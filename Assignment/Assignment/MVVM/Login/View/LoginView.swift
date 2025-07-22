@@ -8,8 +8,6 @@
 import SwiftUI
 
 struct LoginView: View {
-      @State private var countryCode: String = "+91"
-      @State private var phoneNumber: String = "9876543212"
       @State private var isNavigating: Bool = false
       @StateObject var loginVM = LoginVM()
     
@@ -82,7 +80,7 @@ struct LoginView: View {
                   }
               }
               .navigationDestination(isPresented: $isNavigating) {
-                  OTPVerificationView(phoneNumber: "\(countryCode)\(phoneNumber)")
+                  OTPVerificationView(loginVM: self.loginVM)
                }
           }
       }

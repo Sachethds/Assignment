@@ -19,7 +19,7 @@ class LoginVM: ObservableObject  {
     let loginServices: LoginNetworking
     init(loginServices: LoginNetworking = LoginNetworkService(apiRequest: APIRequest(apiManager: APIManager()))) {
         self.loginServices = loginServices
-        mobileNumber = "9876543212"
+        mobileNumber = ""
         countryCode = "+91"
         otp = ""
     }

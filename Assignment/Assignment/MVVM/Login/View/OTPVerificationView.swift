@@ -11,10 +11,9 @@ struct OTPVerificationView: View {
     @State private var otp: String = ""
     @State private var remainingTime = 59
     @State private var timerRunning = true
-    var phoneNumber: String
     @State var isNavigating: Bool = false
     @Environment(\.dismiss) private var dismiss
-    @StateObject var loginVM = LoginVM()
+    @ObservedObject var loginVM = LoginVM()
     
     var body: some View {
         NavigationStack{
@@ -22,7 +21,7 @@ struct OTPVerificationView: View {
                 
                 // Phone number with edit icon
                 HStack(spacing: 4) {
-                    Text(phoneNumber)
+                    Text("\(loginVM.countryCode)\(loginVM.mobileNumber)")
                         .font(.subheadline)
                         .bold()
                     
