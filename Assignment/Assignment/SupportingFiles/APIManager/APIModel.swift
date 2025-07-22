@@ -10,5 +10,5 @@ import Foundation
 struct APIData {
     var url: String
     var method: String?
-    var parameters: [String: Any]?
+    var parameters: Codable?
 }

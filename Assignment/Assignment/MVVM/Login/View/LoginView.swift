@@ -71,15 +71,20 @@ struct LoginView: View {
                   
                   Spacer()
               }
+              .blur(radius: loginVM.isLoading ?? false ? 2 : 0)
               .padding()
+              .onAppear {
+                  loginVM.status = false
+              }
+              .overlay {
+                  if loginVM.isLoading ?? false {
+                      ProgressView()
+                  }
+              }
               .navigationDestination(isPresented: $isNavigating) {
                   OTPVerificationView(phoneNumber: "\(countryCode)\(phoneNumber)")
                }
           }
       }
           
-}
-
-#Preview {
-    LoginView()
 }

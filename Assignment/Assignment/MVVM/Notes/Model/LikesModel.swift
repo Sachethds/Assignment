@@ -29,6 +29,7 @@ struct Likes : Codable {
 }
 
 struct LikeProfiles : Codable {
+    let id = UUID()
     let firstName : String?
     let avatar : String?
 

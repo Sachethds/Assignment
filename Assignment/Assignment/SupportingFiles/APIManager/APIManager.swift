@@ -23,6 +23,7 @@ class APIManager: ApiManagerRequestProtocol {
         
         var request = URLRequest(url: apiURL)
         request.httpMethod = apiData.method
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         if let token = UserDefaults.standard.string(forKey: "token") {
             let headers = ["Authorization":"Bearer \(token)"]
@@ -33,7 +34,7 @@ class APIManager: ApiManagerRequestProtocol {
         
         if let requestBody = apiData.parameters {
             do {
-                request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
+                request.httpBody = try JSONEncoder().encode(requestBody)
             } catch {
                 throw ErrorHandling.invalidParameters
             }
@@ -51,6 +52,7 @@ class APIManager: ApiManagerRequestProtocol {
         
         do {
             let decodeResponse = try JSONDecoder().decode(T.self, from: data)
+            
             return decodeResponse
         } catch {
             throw ErrorHandling.decodingError(error)

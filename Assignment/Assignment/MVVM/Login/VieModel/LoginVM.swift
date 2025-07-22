@@ -11,20 +11,24 @@ import Foundation
 class LoginVM: ObservableObject  {
     @Published var mobileNumber: String
     @Published var countryCode: String
-    @Published var otp: String?
+    @Published var otp: String
     @Published var status: Bool?
     @Published var token: String?
+    @Published var isLoading: Bool?
     
     let loginServices: LoginNetworking
     init(loginServices: LoginNetworking = LoginNetworkService(apiRequest: APIRequest(apiManager: APIManager()))) {
         self.loginServices = loginServices
         mobileNumber = "9876543212"
         countryCode = "+91"
+        otp = ""
     }
 
     func login() async {
-        let loginRequest = ["number": "+919876543212"]
-        //let loginRequest = LoginRequest(number: "\(countryCode)\(mobileNumber)")
+        isLoading = true
+        defer {isLoading = false}
+        
+        let loginRequest = LoginRequest(number: "\(countryCode)\(mobileNumber)")
         var apiData = APIData(url: APPURL.login.url, parameters: loginRequest)
         do {
             let loginResponse: LoginModel? = try await self.loginServices.login(apiData: &apiData)
@@ -37,13 +41,16 @@ class LoginVM: ObservableObject  {
     }
     
     func verifyOtp() async {
-        // let otpRequest = VerifyOtpRequest(number: "\(countryCode)\(mobileNumber)", otp: otp ?? "")
-        let otpRequest = ["number": "\(countryCode)\(mobileNumber)", "otp": otp ?? ""]
+        
+        isLoading = true
+        defer {isLoading = false}
+        
+        let otpRequest = VerifyOtpRequest(number: "\(countryCode)\(mobileNumber)", otp: otp)
         var apiData = APIData(url: APPURL.verification.url, parameters: otpRequest)
         do {
             let verifyResponse: OTPVerificationModel? = try await self.loginServices.verifyOTP(apiData: &apiData)
             self.token = verifyResponse?.token
-            UserDefaults.setValue(self.token, forKey: "token")
+            UserDefaults.standard.set(token, forKey: "token")
         } catch let error as ErrorHandling {
             print(error.errorDescription ?? "")
         } catch {

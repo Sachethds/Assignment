@@ -8,8 +8,9 @@
 import SwiftUI
 
 struct NotesView: View {
+    @StateObject var notesVM = NotesVM()
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 10) {
             
             // Title
             VStack(spacing: 4) {
@@ -24,8 +25,16 @@ struct NotesView: View {
 
             // Main Card
             ZStack(alignment: .bottomLeading) {
-                Image("meena") // Replace with your asset image
-                    .resizable()
+                AsyncImage(url: URL(string: notesVM.notesDetails?.invites?.profiles?[0].photos?.filter({$0.selected == true}).first?.photo ?? "")) { phase in
+                    if let image = phase.image {
+                        image.resizable().aspectRatio(contentMode: .fill)
+                    } else if phase.error != nil {
+                        Image(systemName: "xmark.octagon")
+                            .resizable().scaledToFit().foregroundColor(.red)
+                    } else {
+                        ProgressView()
+                    }
+                }
                     .aspectRatio(contentMode: .fill)
                     .frame(height: 240)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
@@ -35,7 +44,7 @@ struct NotesView: View {
                     )
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Meena, 23")
+                    Text("\(notesVM.notesDetails?.invites?.profiles?[0].generalInformation?.firstName ?? ""), \(notesVM.notesDetails?.invites?.profiles?[0].generalInformation?.age ?? 0)")
                         .font(.headline)
                         .foregroundColor(.white)
                     Text("Tap to review 50+ notes")
@@ -71,23 +80,42 @@ struct NotesView: View {
             // Horizontal Cards
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 16) {
-                    ForEach(["Teena", "Beena"], id: \.self) { name in
-                        VStack {
-                            Image(name.lowercased()) // Replace with your asset names
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 120, height: 160)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                            
-                            Text(name)
-                                .font(.caption)
+                    if let profiles = notesVM.notesDetails?.likes?.profiles {
+                        ForEach(profiles, id: \.id) { likedProfiles in
+                            VStack {
+                                ZStack(alignment: .bottomLeading) {
+                                    
+                                    AsyncImage(url: URL(string: likedProfiles.avatar ?? "")) { phase in
+                                        if let image = phase.image {
+                                            image.resizable().aspectRatio(contentMode: .fill)
+                                        } else if phase.error != nil {
+                                            Image(systemName: "xmark.octagon")
+                                                .resizable().scaledToFit().foregroundColor(.red)
+                                        } else {
+                                            ProgressView()
+                                        }
+                                    }
+                                    .frame(width: (UIScreen.main.bounds.width - (UIScreen.main.bounds.width * 0.1243)) / 2)
+                                    .blur(radius: notesVM.notesDetails?.likes?.canSeeProfile ?? true ? 0 : 10)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color.black.opacity(0.1), lineWidth: 0.5)
+                                    )
+                                    
+                                    Text(likedProfiles.firstName ?? "")
+                                        .font(.headline)
+                                        .foregroundColor(.white)
+                                        .padding()
+                                }
+                                .padding(.top, 20)
+                            }
                         }
                     }
                 }
-                .padding(.vertical)
             }
+            .padding(.bottom, 20)
 
-            Spacer()
 
             // Bottom Tab Bar
             HStack {
@@ -96,8 +124,11 @@ struct NotesView: View {
                 TabBarItem(icon: "heart.fill", label: "Matches", badge: "50+")
                 TabBarItem(icon: "person.fill", label: "Profile")
             }
-            .padding(.vertical, 12)
             .background(Color.white.shadow(radius: 2))
+            .frame(height: 30)
+        }
+        .task {
+            await notesVM.getNotesDetails()
         }
         .navigationBarBackButtonHidden()
         .padding(.horizontal)
@@ -111,7 +142,7 @@ struct TabBarItem: View {
 
     var body: some View {
         VStack {
-            ZStack(alignment: .topTrailing) {
+            ZStack(alignment: .center) {
                 Image(systemName: icon)
                     .font(.title3)
                 if let badge = badge {
@@ -130,3 +161,6 @@ struct TabBarItem: View {
         .frame(maxWidth: .infinity)
     }
 }
+
+
+

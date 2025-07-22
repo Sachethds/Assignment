@@ -39,7 +39,7 @@ struct OTPVerificationView: View {
                     .font(.system(size: 28, weight: .bold))
                 
                 // OTP input
-                TextField("OTP", text: $otp)
+                TextField("OTP", text: $loginVM.otp)
                     .keyboardType(.numberPad)
                     .padding()
                     .background(Color.white)
@@ -52,7 +52,6 @@ struct OTPVerificationView: View {
                 // Continue button and timer
                 HStack {
                     Button(action: {
-                        isNavigating = true
                         Task {
                             await self.loginVM.verifyOtp()
                         }
@@ -66,7 +65,9 @@ struct OTPVerificationView: View {
                             .cornerRadius(25)
                     }
                     .onChange(of: loginVM.token) {
-                        
+                        if loginVM.token != "" {
+                            isNavigating = true
+                        }
                     }
                     
                     Spacer()
@@ -78,6 +79,14 @@ struct OTPVerificationView: View {
                 
                 Spacer()
             }
+            .blur(radius: loginVM.isLoading ?? false ? 2  : 0)
+            .overlay {
+                if loginVM.isLoading ?? false {
+                    ProgressView()
+                        .frame(width: 200, height: 200, alignment: .center)
+                }
+            }
+
         }
         .navigationDestination(isPresented: $isNavigating) {
             NotesView()
